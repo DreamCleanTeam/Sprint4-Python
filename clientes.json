@@ -1,0 +1,10 @@
+[
+    {
+        "id": "cliente1",
+        "nome": "j",
+        "email": "j@gmail.com",
+        "cep": "11111-222",
+        "senha": "123",
+        "produto": false
+    }
+]
