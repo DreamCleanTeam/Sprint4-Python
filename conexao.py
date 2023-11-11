@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 
 def conexao_Arduino():
-    url = "http://46.17.108.113:1026/v2/entities/urn:ngsi-ld:DreamClean:008/attrs/distance"
+    url = "http://46.17.108.113:1026/v2/entities/urn:ngsi-ld:DreamClean:008/attrs"
 
     payload = {}
     headers = {
@@ -12,18 +12,25 @@ def conexao_Arduino():
     'accept': 'application/json'
     }
 
-    response = requests.request("GET", url, headers=headers, data=payload)
+    responseWeight = requests.request("GET", url + "/weight", headers=headers, data=payload)
+    responseDistance = requests.request("GET", url + "/distance", headers=headers, data=payload)
 
-    if response.status_code == 200:
+
+    if responseWeight.status_code == 200 and responseDistance.status_code == 200:
         # Converte a resposta JSON para um dicionário Python
-        data = response.json()
+        dataWeight = responseWeight.json()
+        dataDistance = responseDistance.json()
 
-        # Extrai e imprime o valor da chave "value"
-        value = data.get("value")
-        print("Valor:", value)
 
-        # Recebe o valor do request e armazena na variável timeInstant
-        timeInstant = data.get("metadata",{}).get("TimeInstant",{}).get("value")
+        #### Armazena o valor do weight (peso) ####
+        weight = dataWeight.get("value")
+        
+        #### Armazena o valor da distância (volume) ####
+        distance = dataDistance.get("value")
+
+
+        ### Armazena o valor da data e hora da última checagem ####
+        timeInstant = dataDistance.get("metadata",{}).get("TimeInstant",{}).get("value")
         
         # Converte a string para um objeto datetime
         data = datetime.strptime(timeInstant, "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -31,9 +38,9 @@ def conexao_Arduino():
         # Formata o objeto datetime para um formato mais legível
         dataFormatada = data.strftime("%d/%m/%Y %H:%M:%S")
 
-        print("Data e hora:", dataFormatada)
+        
+        #Retorna os valores de distância, peso e data
+        return distance, weight, dataFormatada
     else:
-        print("Erro na solicitação:", response.status_code)
-
-
-conexao_Arduino()
+        print("Erro na solicitação:", responseDistance.status_code)
+        print("Erro na solicitação:", responseWeight.status_code)

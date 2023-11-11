@@ -27,9 +27,9 @@ while menu == 0:
     
     elif option == 2:
         print("Bem-vindo! Por favor, faça o seu registro!\n")
-        nome = input("Por favor, informe seu nome:\n ")
-        email = input("Digite o e-mail:\n ")
-        cep = input("Informe seu CEP (formato xxxxx-xxx):\n ")
+        nome = input("Por favor, informe seu nome:\n")
+        email = input("Digite o e-mail:\n")
+        cep = input("Informe seu CEP (formato xxxxx-xxx):\n")
         senha = input("Digite sua senha!\n")
         senha2 = input("Confirme sua senha!\n")
 
@@ -68,7 +68,7 @@ while menu == 1 :
 
     #Se o usuário não possuir o produto
     else:
-        print("Não possui o produto")
+        print("\n-- Identifiquei que você não possui o produto ainda! --")
     
         option = int(input("\n\n1-Desejo solicitar o meu Clean Drain!\n2-Desejo Fazer Log-Out do app\n"))
         

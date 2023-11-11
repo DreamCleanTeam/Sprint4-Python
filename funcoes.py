@@ -1,10 +1,11 @@
 import json
 import re
+import conexao
 
 
 # Função para verificar o login e a senha
 def verificar_login_senha(email, senha):
-    with open('clientes.json', 'r') as f:
+    with open('clientes.json', 'r', encoding='utf-8') as f:
         clientes = json.load(f)
         for cliente in clientes:
             if cliente['email'] == email:
@@ -21,7 +22,7 @@ def verificar_login_senha(email, senha):
 
 #Veerifa se o cliente possui o produto
 def verificaProduto(id):
-    with open('clientes.json', 'r') as f:
+    with open('clientes.json', 'r', encoding='utf-8') as f:
         clientes = json.load(f)
         for cliente in clientes:
             if cliente['id'] == id:
@@ -36,7 +37,7 @@ def verificaProduto(id):
 #Recebe dados do json e atualiza com novo cliente
 def clientes_global(clientes, nome, email, cep, senha):
     try:
-        with open('clientes.json', 'r') as f:
+        with open('clientes.json', 'r', encoding='utf-8') as f:
             content = f.read()
             if not content:  # Verifica se o conteúdo do arquivo está vazio
                 clientes = []
@@ -58,8 +59,8 @@ def clientes_global(clientes, nome, email, cep, senha):
     }
     clientes.append(cliente)
 
-    with open('clientes.json', 'w') as f:
-        json.dump(clientes, f, indent=4)
+    with open('clientes.json', 'w', encoding='utf-8') as f:
+        json.dump(clientes, f, indent=4, ensure_ascii=False)
 
 
 
@@ -67,7 +68,7 @@ def clientes_global(clientes, nome, email, cep, senha):
 
 #Function para validar as informações obtidas do cliente
 def validar_informacoes(nome, cep, email):
-    if not re.match("^[a-zA-Z\s]*$", nome):
+    if not re.match("^[a-zA-Z\s\w~]*$", nome, re.UNICODE):
         print("Nome só pode conter letras")
         return False
     if not re.match("^\d{5}-\d{3}$", cep):
@@ -85,13 +86,13 @@ def validar_informacoes(nome, cep, email):
 #Verifica o local da instalação
 def validar_instalacao(end,tel,cpf):
     if not re.match(r'^[A-Za-z0-9\s,]*$', end):
-        print("Endereço inválido... Digite novamente")
+        print("Endereço inválido... Insira os dados novamente\n")
         return False
-    elif not re.match(r'^\d{9}$',tel) and not re.match(r'^\d{11}$',tel):
-        print("O telefone inserido deve ter no mínimo 9 dígitos (ou 11 com o DDD)... Digite novamente")
+    elif not re.match(r'^\d{5}-\d{4}$', tel) and not re.match(r'^\d{7}-\d{4}$', tel) and not re.match(r'^(\d{2})\d{5}-\d{4}$', tel):
+        print("O telefone inserido deve ter no mínimo 9 dígitos (ou 11 com o DDD)... Insira os dados novamente\n")
         return False
     elif not re.match(r'^\d{9}-\d{2}$', cpf):
-        print("CPF deve possuir 9 dígitos, um traço e 2 dígitos... Digite novamente")
+        print("CPF deve possuir 9 dígitos, um traço e 2 dígitos... Insira os dados novamente\n")
         return False
     else:
         print("---Informações da instalação recebidas com sucesso!---")
@@ -102,6 +103,7 @@ def validar_instalacao(end,tel,cpf):
 
 #Compra do produto
 def option1(id):
+    print("\n\n----- COMPRA DO CLEAN DRAIN -----")
     print("\n\nClaro,o preço de um Clean Drain com o custo de instalação é de R$120,00 com o frete grátis!")
 
     escolha = input("Deseja adquirir o seu agora mesmo? ('S' para confirmar) ").lower()
@@ -111,7 +113,7 @@ def option1(id):
         x = True
         while x == True:
             endereco = input("Insira o endereço da instalação: ")
-            telefone = input("Insira o telefone do responsável que acompanhará a instalação (apenas números): ")
+            telefone = input("Insira o telefone do responsável que acompanhará a instalação ((xx)xxxxx-xxxx): ")
             cpf = input("Insira o cpf do responsável que acompanhará a instalação (xxxxxxxxx-xx): ")
             
             if validar_instalacao(endereco, telefone, cpf) is True:
@@ -139,14 +141,14 @@ def option1(id):
         ### Atualiza no json que o cliente agora possui o produto
         cliente_produto = True
 
-        with open('clientes.json', 'r') as f:
+        with open('clientes.json', 'r', encoding='utf-8') as f:
             clientes = json.load(f)
             for cliente in clientes:
                 if cliente['id'] == id:
                     cliente['produto'] = cliente_produto
 
         with open('clientes.json','w') as f:
-            json.dump(clientes,f, indent=4)
+            json.dump(clientes,f, indent=4, ensure_ascii=False)
 
         escolha2 = int(input("\nDeseja voltar ao menu principal (digite 1) ou fazer o Log-Out (digite 2)? "))
 
@@ -166,7 +168,14 @@ def option1(id):
 
 #Status do Clean Drain
 def option2():
-    print(f"\n\nO seu Clean Drain está com {weight} KG de lixo acumulado, e chegando à {vol} centimetros do 'teto'. É recomendado remover o lixo por volta dos 5Kg e quando está á 20cm do teto")
+    print("\n\n----- STATUS DO CLEAN DRAIN -----")
+
+    print("\n-- É recomendado remover o lixo por volta dos 5Kg e/ou quando está á 20cm do teto! --")
+
+    vol, weight, data = conexao.conexao_Arduino() 
+
+    print(f"\n\nO seu Clean Drain está com: \n- {weight} KG de lixo acumulado\n- {vol} centimetros do 'teto'.")
+    print(f"Data e hora da última checagem: {data}") 
         
     if weight > 5 :
         print("\nALERTA! O peso do seu lixo ultrapassa os 5kg. Recomenda-se remover o lixo o mais rápido possível!")
@@ -176,10 +185,6 @@ def option2():
         print("\nALERTA! O peso e o volume do seu lixo ultrapassam os limites. Recomenda-se remover o lixo o mais rápido possível!")
     else:
         print("\nO volume e o peso do seu lixo estão abaixo do limite, ainda não é necessário removê-lo")
-    
-    print(f"\nO seu Clean drain está com {bateria}% de bateria.")
-    if bateria < 20:
-        print("ALERTA! O seu Clean drain está com menos de 20% de bateria, recomenda-se recarregá-lo")
 
     escolha = int(input("\nDeseja voltar ao menu principal (digite 1) ou fazer o Log-Out (digite 2)? "))
         
@@ -197,6 +202,8 @@ def option2():
 
 #Manutenção do Clean Drain
 def option3():
+    print("\n\n----- MANUTENÇÃO DO CLEAN DRAIN -----")
+
     print("\n\nClaro,o preço da manutenção começa a partir de de R$30.00 mas pode variar caso haja necessidade de troca de peças! Como deseja efetuar o pagamento?")
     pag = int(input("1-PIX\n2-Cartao de crédito/débito."))
     if pag == 1:
