@@ -38,9 +38,34 @@ def conexao_Arduino():
         # Formata o objeto datetime para um formato mais legível
         dataFormatada = data.strftime("%d/%m/%Y %H:%M:%S")
 
+        try:
+            with open('db.json', 'r', encoding='utf-8') as f:
+                content = f.read()
+                if not content:  # Verifica se o conteúdo do arquivo está vazio
+                    cleanDrain = {'cleanDrain':[]}
+                else:
+                    f.seek(0)  # Volta para o início do arquivo
+                    cleanDrain = json.load(f)
+        
+        except FileNotFoundError:
+            cleanDrain = {'cleanDrain':[]}
+
+        dadosSensor = {
+            'id': 1,
+            'weight': weight,
+            'distance': distance,
+            'dataHora': dataFormatada,
+        }
+
+        # armazena os dados recebidos do sensor
+        cleanDrain['cleanDrain'] = dadosSensor
+
+        #envia os dados para o db.json
+        with open('db.json', 'w', encoding='utf-8') as f:
+            json.dump(cleanDrain, f, indent = 4, ensure_ascii=False)
         
         #Retorna os valores de distância, peso e data
-        return distance, weight, dataFormatada
     else:
         print("Erro na solicitação:", responseDistance.status_code)
         print("Erro na solicitação:", responseWeight.status_code)
+

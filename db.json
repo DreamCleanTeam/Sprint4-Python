@@ -1,0 +1,66 @@
+{
+    "clientes": [
+        {
+            "id": 1,
+            "nome": "Rod",
+            "email": "rodinei@gmail.com",
+            "cep": "00000-111",
+            "senha": "123",
+            "produto": true
+        },
+        {
+            "id": 2,
+            "nome": "Paulo",
+            "email": "paulo@gmail.com",
+            "cep": "11111-222",
+            "senha": "1234",
+            "produto": false
+        },
+        {
+            "id": 3,
+            "nome": "Julia",
+            "email": "julia@gmail.com",
+            "cep": "11111-777",
+            "senha": "123456",
+            "produto": true
+        },
+        {
+            "id": 4,
+            "nome": "Eduarda",
+            "email": "duda@gmail.com",
+            "cep": "12345-678",
+            "senha": "123",
+            "produto": false
+        },
+        {
+            "id": 5,
+            "nome": "Carol",
+            "email": "carol@gmail.com",
+            "cep": "11111-777",
+            "senha": "123",
+            "produto": false
+        },
+        {
+            "id": 6,
+            "nome": "Raphael",
+            "email": "raphael@gmail.com",
+            "cep": "11111-222",
+            "senha": "1234",
+            "produto": true
+        },
+        {
+            "id": 7,
+            "nome": "Thiago",
+            "email": "thiaguin@gmail.com",
+            "cep": "12375-875",
+            "senha": "127",
+            "produto": false
+        }
+    ],
+    "cleanDrain": {
+        "id": 1,
+        "weight": 30.3,
+        "distance": 319.76,
+        "dataHora": "10/11/2023 13:00:38"
+    }
+}

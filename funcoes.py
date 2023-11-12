@@ -5,9 +5,9 @@ import conexao
 
 # Função para verificar o login e a senha
 def verificar_login_senha(email, senha):
-    with open('clientes.json', 'r', encoding='utf-8') as f:
+    with open('db.json', 'r', encoding='utf-8') as f:
         clientes = json.load(f)
-        for cliente in clientes:
+        for cliente in clientes['clientes']:
             if cliente['email'] == email:
                 if cliente['senha'] == senha:
                     return True, cliente['nome'], cliente['id']
@@ -22,9 +22,9 @@ def verificar_login_senha(email, senha):
 
 #Veerifa se o cliente possui o produto
 def verificaProduto(id):
-    with open('clientes.json', 'r', encoding='utf-8') as f:
+    with open('db.json', 'r', encoding='utf-8') as f:
         clientes = json.load(f)
-        for cliente in clientes:
+        for cliente in clientes['clientes']:
             if cliente['id'] == id:
                 if cliente['produto'] == True:
                     return True
@@ -37,18 +37,18 @@ def verificaProduto(id):
 #Recebe dados do json e atualiza com novo cliente
 def clientes_global(clientes, nome, email, cep, senha):
     try:
-        with open('clientes.json', 'r', encoding='utf-8') as f:
+        with open('db.json', 'r', encoding='utf-8') as f:
             content = f.read()
             if not content:  # Verifica se o conteúdo do arquivo está vazio
-                clientes = []
+                clientes = {'clientes':[]}
             else:
                 f.seek(0)  # Volta para o início do arquivo
                 clientes = json.load(f)
     
     except FileNotFoundError:
-        clientes = []
+        clientes = {'cleintes':[]}
 
-    cliente_id = f'cliente{len(clientes) + 1}'  # Gere um ID único
+    cliente_id = len(clientes['clientes']) + 1  # Gere um ID único
     cliente = {
         'id': cliente_id,
         'nome': nome,
@@ -57,9 +57,11 @@ def clientes_global(clientes, nome, email, cep, senha):
         'senha': senha,
         'produto':False
     }
-    clientes.append(cliente)
 
-    with open('clientes.json', 'w', encoding='utf-8') as f:
+    clientes['clientes'].append(cliente)
+
+
+    with open('db.json', 'w', encoding='utf-8') as f:
         json.dump(clientes, f, indent=4, ensure_ascii=False)
 
 
@@ -88,8 +90,7 @@ def validar_instalacao(end,tel,cpf):
     if not re.match(r'^[A-Za-z0-9\s,]*$', end):
         print("Endereço inválido... Insira os dados novamente\n")
         return False
-    elif not re.match(r'^\d{5}-\d{4}$', tel) and not re.match(r'^\d{7}-\d{4}$', tel) and not re.match(r'^(\d{2})\d{5}-\d{4}$', tel):
-        print("O telefone inserido deve ter no mínimo 9 dígitos (ou 11 com o DDD)... Insira os dados novamente\n")
+    elif not re.match(r'^\d{5}-\d{4}$', tel) and not re.match(r'^\d{7}-\d{4}$', tel) and not re.match(r'^(\d{2} \d{5}-\d{4})$', tel):
         return False
     elif not re.match(r'^\d{9}-\d{2}$', cpf):
         print("CPF deve possuir 9 dígitos, um traço e 2 dígitos... Insira os dados novamente\n")
@@ -113,7 +114,7 @@ def option1(id):
         x = True
         while x == True:
             endereco = input("Insira o endereço da instalação: ")
-            telefone = input("Insira o telefone do responsável que acompanhará a instalação ((xx)xxxxx-xxxx): ")
+            telefone = input("Insira o telefone do responsável que acompanhará a instalação (xx xxxxx-xxxx): ")
             cpf = input("Insira o cpf do responsável que acompanhará a instalação (xxxxxxxxx-xx): ")
             
             if validar_instalacao(endereco, telefone, cpf) is True:
@@ -141,13 +142,13 @@ def option1(id):
         ### Atualiza no json que o cliente agora possui o produto
         cliente_produto = True
 
-        with open('clientes.json', 'r', encoding='utf-8') as f:
+        with open('db.json', 'r', encoding='utf-8') as f:
             clientes = json.load(f)
-            for cliente in clientes:
+            for cliente in clientes['clientes']:
                 if cliente['id'] == id:
                     cliente['produto'] = cliente_produto
 
-        with open('clientes.json','w') as f:
+        with open('db.json','w', encoding='utf-8') as f:
             json.dump(clientes,f, indent=4, ensure_ascii=False)
 
         escolha2 = int(input("\nDeseja voltar ao menu principal (digite 1) ou fazer o Log-Out (digite 2)? "))
@@ -171,18 +172,25 @@ def option2():
     print("\n\n----- STATUS DO CLEAN DRAIN -----")
 
     print("\n-- É recomendado remover o lixo por volta dos 5Kg e/ou quando está á 20cm do teto! --")
+    
+    conexao.conexao_Arduino()
 
-    vol, weight, data = conexao.conexao_Arduino() 
+    with open('db.json', 'r', encoding='utf-8') as f:
+        cleanDrain = json.load(f)
+    
+    weight = cleanDrain['cleanDrain']['weight']
+    vol = cleanDrain['cleanDrain']['distance']
+    data = cleanDrain['cleanDrain']['dataHora']
 
-    print(f"\n\nO seu Clean Drain está com: \n- {weight} KG de lixo acumulado\n- {vol} centimetros do 'teto'.")
+    print(f"\n\nO seu Clean Drain está com: \n• {weight} KG de lixo acumulado\n• {vol} cm do 'teto'")
     print(f"Data e hora da última checagem: {data}") 
         
-    if weight > 5 :
-        print("\nALERTA! O peso do seu lixo ultrapassa os 5kg. Recomenda-se remover o lixo o mais rápido possível!")
-    elif vol > 20:
-        print("\nALERTA! O volume do seu lixo ultrapassa os 20cm do teto. Recomenda-se remover o lixo o mais rápido possível!")
-    elif weight > 5 and vol > 20:
+    if weight > 5 and vol > 20:
         print("\nALERTA! O peso e o volume do seu lixo ultrapassam os limites. Recomenda-se remover o lixo o mais rápido possível!")
+    elif weight > 5 and vol < 20:
+        print("\nALERTA! O peso do seu lixo ultrapassa os 5kg. Recomenda-se remover o lixo o mais rápido possível!")
+    elif vol > 20 and weight < 5:
+        print("\nALERTA! O volume do seu lixo ultrapassa os 20cm do teto. Recomenda-se remover o lixo o mais rápido possível!")
     else:
         print("\nO volume e o peso do seu lixo estão abaixo do limite, ainda não é necessário removê-lo")
 
@@ -194,8 +202,6 @@ def option2():
         menu = 2 
     
     return menu
-
-
 
 
 
